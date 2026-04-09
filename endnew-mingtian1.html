@@ -351,7 +351,7 @@
         const cannotSendContacts = ['qiaoqiao', 'mother', 'zhangmanager', 'father']; // 乔乔初始不可发，脚本③开始后才可
 
         // ----- 游戏状态 -----
-        let gameState = {
+        let gameState = loadGameState() || {
             chatData: JSON.parse(JSON.stringify(initialChatData)),
             contactsData: JSON.parse(JSON.stringify(initialContactsData)),
             currentChatId: null,
@@ -389,8 +389,27 @@
         const searchText = document.getElementById('search-text');
 
         // ----- 工具函数 -----
-        function saveGameState() { /* 本演示无需持久存储，略 */ }
+        function saveGameState() {
+            try {
+                localStorage.setItem('mingtian1GameState', JSON.stringify(gameState));
+            } catch (e) {
+                console.error('保存游戏状态失败:', e);
+            }
+        }
         function showNotification(msg) { alert(msg); } // 简化，用alert代替
+
+        // 加载游戏状态
+        function loadGameState() {
+            try {
+                const savedState = localStorage.getItem('mingtian1GameState');
+                if (savedState) {
+                    return JSON.parse(savedState);
+                }
+            } catch (e) {
+                console.error('加载游戏状态失败:', e);
+            }
+            return null;
+        }
 
         // 渲染聊天列表 (按时间戳倒序)
         function renderChatList() {
@@ -418,6 +437,7 @@
                     document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
                     item.classList.add('active');
                     switchToChat(chat.id);
+                    saveGameState(); // 保存状态
                 });
                 chatListEl.appendChild(item);
             });
@@ -625,6 +645,7 @@
                     switchToChat(chatId);
                 }
                 renderChatList();
+                saveGameState(); // 保存状态
                 checkAllScriptsDone(); // 检查是否前两个完成
                 return;
             }
@@ -647,6 +668,7 @@
                         switchToChat(chatId);
                     }
                     renderChatList();
+                    saveGameState(); // 保存状态
                     // 继续处理下一条
                     playNextReporter(chatId, script, stageKey, completeKey, character);
                 }, line.delay || 2000);
@@ -683,6 +705,7 @@
             chat.messages.push({ type: 'sent', time: `今天 ${ts}`, content: text });
             chat.lastTimestamp = Date.now(); chat.lastTime = '刚刚'; chat.preview = text.substring(0,15);
             switchToChat(chatId); renderChatList();
+            saveGameState(); // 保存状态
         }
 
         // 启动脚本（修改后：第一条消息直接展示，无“正在输入”环节）
@@ -714,6 +737,7 @@
                     playNextReporter('mingyueye', mingyueyeNewScript, 'mingyueyeNewStage', 'mingyueyeNewComplete', 'reporter');
                 }
                 renderChatList(); // 更新列表预览和红点
+                saveGameState(); // 保存状态
             }
         }
 
@@ -740,6 +764,7 @@
                     playNextReporter('zhizuchangle', zhizuchangleNewScript, 'zhizuchangleNewStage', 'zhizuchangleNewComplete', 'reporter');
                 }
                 renderChatList();
+                saveGameState(); // 保存状态
             }
         }
 
@@ -748,6 +773,7 @@
                 gameState.bothFirstDone = true;
                 // 触发乔乔脚本③
                 startQiaoqiaoScript();
+                saveGameState(); // 保存状态
             }
         }
 
@@ -774,6 +800,7 @@
                     playNextReporter('qiaoqiao', qiaoqiaoNewScript, 'qiaoqiaoNewStage', 'qiaoqiaoNewComplete', 'reporter');
                 }
                 renderChatList();
+                saveGameState(); // 保存状态
             }
         }
 
@@ -810,12 +837,12 @@
 
             // 桌面端默认选中第一个聊天，手机端只显示聊天列表
             if (gameState.chatData.length) {
-                if (!isMobile) {
+                if (!isMobile && !gameState.currentChatId) {
                     // 桌面端自动显示聊天内容
                     gameState.currentChatId = gameState.chatData[0].id;
                     switchToChat(gameState.currentChatId);
                     document.querySelector(`.contact-item[data-id="${gameState.currentChatId}"]`)?.classList.add('active');
-                } else {
+                } else if (isMobile) {
                     // 手机端只显示聊天列表，不自动打开聊天
                     // 确保聊天区域默认隐藏
                     const chatArea = document.querySelector('.chat-area');
@@ -825,6 +852,10 @@
                     chatMessagesEl.innerHTML = '<div class="empty-chat"><i class="fas fa-comments"></i><div>选择一个聊天开始对话</div></div>';
                     chatInputAreaEl.innerHTML = '';
                     chatHeaderLeftEl.innerHTML = '';
+                } else if (gameState.currentChatId) {
+                    // 有保存的聊天ID，显示对应聊天
+                    switchToChat(gameState.currentChatId);
+                    document.querySelector(`.contact-item[data-id="${gameState.currentChatId}"]`)?.classList.add('active');
                 }
             }
 
@@ -845,6 +876,7 @@
                     const chatArea = document.querySelector('.chat-area');
                     chatArea.classList.remove('active');
                 }
+                saveGameState(); // 保存状态
             });
             navContactsBtn.addEventListener('click', () => {
                 navContactsBtn.classList.add('active'); navChatBtn.classList.remove('active');
@@ -857,6 +889,7 @@
                     const chatArea = document.querySelector('.chat-area');
                     chatArea.classList.remove('active');
                 }
+                saveGameState(); // 保存状态
             });
 
             addContactBtn.addEventListener('click', () => { addContactModal.style.display = 'flex'; contactIdInput.focus(); });
@@ -868,6 +901,7 @@
                     if (!gameState.contactsData.find(c => c.id === 'zhizuchangle')) {
                         gameState.contactsData.push({ id: 'zhizuchangle', name: '知足常乐' });
                         renderContacts();
+                        saveGameState(); // 保存状态
                     }
                 } else {
                     alert('联系人不存在');
@@ -876,6 +910,12 @@
             });
             closeWindowBtn.addEventListener('click', () => { window.close(); });
             addContactModal.addEventListener('click', (e) => { if (e.target === addContactModal) { addContactModal.style.display = 'none'; contactIdInput.value = ''; } });
+            
+            // 页面关闭前保存状态
+            window.addEventListener('beforeunload', saveGameState);
+            
+            // 定期保存状态（每30秒）
+            setInterval(saveGameState, 30000);
         }
 
         document.addEventListener('DOMContentLoaded', init);
