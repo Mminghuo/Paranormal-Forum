@@ -35,8 +35,16 @@
         
         /* 手机布局 */
         @media screen and (max-width: 768px) {
+            body {
+                height: 100vh;
+                width: 100vw;
+                overflow: hidden;
+            }
+            
             .chat-container {
                 flex-direction: column;
+                height: 100vh;
+                width: 100vw;
             }
             
             .nav-sidebar {
@@ -46,6 +54,7 @@
                 justify-content: space-around;
                 padding-top: 0;
                 padding-bottom: 0;
+                flex-shrink: 0;
             }
             
             .nav-item {
@@ -57,6 +66,8 @@
                 height: calc(100vh - 60px);
                 border-right: none;
                 border-top: 1px solid #e6e6e6;
+                display: flex;
+                flex-direction: column;
             }
             
             .chat-area {
@@ -68,6 +79,7 @@
                 z-index: 1000;
                 display: none;
                 background-color: white;
+                flex-direction: column;
             }
             
             .chat-area.active {
@@ -78,12 +90,26 @@
                 padding: 12px 15px;
                 background-color: #f7f7f7;
                 border-bottom: 1px solid #e6e6e6;
+                flex-shrink: 0;
+            }
+            
+            .chat-messages {
+                flex: 1;
+                overflow-y: auto;
+                padding: 15px;
+            }
+            
+            .chat-input-area {
+                flex-shrink: 0;
+                padding: 10px 10px 20px 10px;
+                margin-bottom: 0;
             }
             
             .back-btn {
                 display: block !important;
                 font-size: 18px;
                 color: #07c160;
+                margin-right: 10px;
             }
             
             .chat-contact-avatar {
@@ -101,10 +127,6 @@
                 font-size: 12px;
             }
             
-            .chat-messages {
-                padding: 15px;
-            }
-            
             .message {
                 margin-bottom: 15px;
             }
@@ -119,11 +141,6 @@
                 max-width: 75%;
                 padding: 8px 12px;
                 font-size: 14px;
-            }
-            
-            .chat-input-area {
-                padding: 10px 10px 20px 10px;
-                margin-bottom: 10px;
             }
             
             .input-row {
@@ -2556,14 +2573,17 @@
             
             renderChatInputArea(chatId);
             
-            // 在手机上显示聊天区域
-            const chatArea = document.querySelector('.chat-area');
-            chatArea.classList.add('active');
-            
-            // 显示返回按钮
-            const backBtn = document.querySelector('.back-btn');
-            if (backBtn) {
-                backBtn.style.display = 'block';
+            // 检测是否为手机端，在手机上显示聊天区域
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                const chatArea = document.querySelector('.chat-area');
+                chatArea.classList.add('active');
+                
+                // 显示返回按钮
+                const backBtn = document.querySelector('.back-btn');
+                if (backBtn) {
+                    backBtn.style.display = 'block';
+                }
             }
         }
         
@@ -2571,6 +2591,16 @@
             const chatArea = document.querySelector('.chat-area');
             chatArea.classList.remove('active');
             gameState.currentChatId = null;
+            
+            // 清除聊天区域的选中状态
+            chatMessagesEl.innerHTML = '<div class="empty-chat"><i class="fas fa-comments"></i><div>选择一个聊天开始对话</div></div>';
+            chatInputAreaEl.innerHTML = '';
+            chatHeaderLeftEl.innerHTML = '';
+            
+            // 清除联系人的active状态
+            document.querySelectorAll('.contact-item').forEach(item => {
+                item.classList.remove('active');
+            });
         }
         
         // 显示链接已失效
@@ -3546,12 +3576,24 @@
             initChatList();
             initContacts();
             
-            // 默认显示第一个聊天
+            // 默认显示第一个聊天（仅在桌面端自动显示）
             if (gameState.chatData.length > 0) {
                 // 确保文件传输助手是第一个，否则重新排序
                 const firstChatId = 'file-helper';
                 gameState.currentChatId = firstChatId;
-                switchToChat(firstChatId);
+                
+                // 检测是否为手机端
+                const isMobile = window.innerWidth <= 768;
+                
+                if (!isMobile) {
+                    // 桌面端自动显示聊天内容
+                    switchToChat(firstChatId);
+                } else {
+                    // 手机端只显示空状态，不自动打开聊天
+                    chatMessagesEl.innerHTML = '<div class="empty-chat"><i class="fas fa-comments"></i><div>选择一个聊天开始对话</div></div>';
+                    chatInputAreaEl.innerHTML = '';
+                    chatHeaderLeftEl.innerHTML = '';
+                }
                 
                 setTimeout(() => {
                     const firstContact = document.querySelector(`.contact-item[data-id="${firstChatId}"]`);
