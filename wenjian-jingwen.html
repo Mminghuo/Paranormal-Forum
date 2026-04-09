@@ -24,7 +24,7 @@
         
         .page-container {
             width: 100%;
-            max-width: 900px;
+            max-width: 1200px;
             background-color: #fff;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             border: 1px solid #d4c9b5;
@@ -85,6 +85,28 @@
         }
         
         /* 响应式调整 */
+        @media (min-width: 1200px) {
+            .page-container {
+                max-width: 1400px;
+            }
+            
+            .vertical-text {
+                font-size: 28px;
+                letter-spacing: 0.3em;
+            }
+        }
+        
+        @media (max-width: 1199px) {
+            .page-container {
+                max-width: 1000px;
+            }
+            
+            .vertical-text {
+                font-size: 26px;
+                letter-spacing: 0.25em;
+            }
+        }
+        
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -93,6 +115,7 @@
             .page-container {
                 padding: 20px;
                 min-height: calc(100vh - 20px);
+                max-width: 800px;
             }
             
             .vertical-text {
@@ -118,6 +141,7 @@
             .page-container {
                 padding: 15px;
                 min-height: calc(100vh - 10px);
+                max-width: 450px;
             }
             
             .vertical-text {
