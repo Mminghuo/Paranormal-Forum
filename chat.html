@@ -33,6 +33,118 @@
             overflow: hidden;
         }
         
+        /* 手机布局 */
+        @media screen and (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+            }
+            
+            .nav-sidebar {
+                width: 100%;
+                height: 60px;
+                flex-direction: row;
+                justify-content: space-around;
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+            
+            .nav-item {
+                margin-bottom: 0;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: calc(100vh - 60px);
+                border-right: none;
+                border-top: 1px solid #e6e6e6;
+            }
+            
+            .chat-area {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                z-index: 1000;
+                display: none;
+                background-color: white;
+            }
+            
+            .chat-area.active {
+                display: flex;
+            }
+            
+            .chat-header {
+                padding: 12px 15px;
+                background-color: #f7f7f7;
+                border-bottom: 1px solid #e6e6e6;
+            }
+            
+            .back-btn {
+                display: block !important;
+                font-size: 18px;
+                color: #07c160;
+            }
+            
+            .chat-contact-avatar {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .chat-contact-name {
+                font-size: 16px;
+                font-weight: bold;
+            }
+            
+            .close-window-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            .chat-messages {
+                padding: 15px;
+            }
+            
+            .message {
+                margin-bottom: 15px;
+            }
+            
+            .message-avatar {
+                width: 32px;
+                height: 32px;
+                margin: 0 8px;
+            }
+            
+            .message-content {
+                max-width: 75%;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            .chat-input-area {
+                padding: 10px 10px 20px 10px;
+                margin-bottom: 10px;
+            }
+            
+            .input-row {
+                align-items: center;
+            }
+            
+            .chat-input {
+                padding: 8px 10px;
+                font-size: 14px;
+                min-height: 36px;
+                max-height: 100px;
+            }
+            
+            .send-btn {
+                padding: 6px 16px;
+                height: 36px;
+                min-width: 70px;
+                font-size: 14px;
+            }
+        }
+        
         /* 左侧导航栏 */
         .nav-sidebar {
             width: 70px;
@@ -2329,6 +2441,9 @@
             const avatar = getRandomAvatar(chat.id);
             
             chatHeaderLeftEl.innerHTML = `
+                <div class="back-btn" onclick="hideChatArea()" style="margin-right: 10px; cursor: pointer; display: none;">
+                    <i class="fas fa-arrow-left"></i>
+                </div>
                 <div class="chat-contact-avatar" style="background-color: ${avatar.color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">
                     ${avatar.text}
                 </div>
@@ -2440,6 +2555,22 @@
             }, 10);
             
             renderChatInputArea(chatId);
+            
+            // 在手机上显示聊天区域
+            const chatArea = document.querySelector('.chat-area');
+            chatArea.classList.add('active');
+            
+            // 显示返回按钮
+            const backBtn = document.querySelector('.back-btn');
+            if (backBtn) {
+                backBtn.style.display = 'block';
+            }
+        }
+        
+        function hideChatArea() {
+            const chatArea = document.querySelector('.chat-area');
+            chatArea.classList.remove('active');
+            gameState.currentChatId = null;
         }
         
         // 显示链接已失效
