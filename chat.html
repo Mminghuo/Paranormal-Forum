@@ -506,13 +506,19 @@
             cursor: pointer;
         }
         
+        .input-row {
+            display: flex;
+            align-items: flex-end;
+            margin-top: 10px;
+            gap: 10px;
+        }
+        
         .chat-input-wrapper {
             flex: 1;
             background-color: white;
             border-radius: 4px;
             border: 1px solid #e6e6e6;
             overflow: hidden;
-            margin-top: 10px;
         }
         
         .chat-input {
@@ -545,12 +551,14 @@
             border: none;
             border-radius: 4px;
             padding: 8px 20px;
-            margin-left: 10px;
             cursor: pointer;
             font-weight: bold;
             transition: background-color 0.2s;
-            align-self: flex-end;
-            margin-top: 10px;
+            height: 40px;
+            min-width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .send-btn:hover:not(:disabled) {
@@ -859,6 +867,10 @@
                 margin-right: 12px;
             }
             
+            .input-row {
+                align-items: flex-end;
+            }
+            
             .chat-input {
                 padding: 10px 12px;
                 font-size: 13px;
@@ -868,7 +880,8 @@
             
             .send-btn {
                 padding: 6px 16px;
-                margin-top: 8px;
+                height: 36px;
+                min-width: 70px;
             }
             
             .contact-item {
@@ -968,6 +981,10 @@
                 max-width: 120px;
             }
             
+            .input-row {
+                align-items: flex-end;
+            }
+            
             .chat-input {
                 padding: 8px 10px;
                 font-size: 12px;
@@ -978,6 +995,8 @@
             .send-btn {
                 padding: 4px 12px;
                 font-size: 12px;
+                height: 32px;
+                min-width: 60px;
             }
             
             .contact-item {
@@ -1951,10 +1970,12 @@
                         <div class="chat-tool-btn"><i class="fas fa-smile"></i></div>
                         <div class="chat-tool-btn"><i class="fas fa-paperclip"></i></div>
                     </div>
-                    <div class="chat-input-wrapper">
-                        <textarea class="chat-input readonly" id="message-input" placeholder="请点击此处输入消息" readonly></textarea>
+                    <div class="input-row">
+                        <div class="chat-input-wrapper">
+                            <textarea class="chat-input readonly" id="message-input" placeholder="请点击此处输入消息" readonly></textarea>
+                        </div>
+                        <button class="send-btn" id="send-btn">发送</button>
                     </div>
-                    <button class="send-btn" id="send-btn">发送</button>
                 `;
                 
                 chatInputAreaEl.appendChild(inputArea);
@@ -2185,10 +2206,12 @@
                         <div class="chat-tool-btn"><i class="fas fa-smile"></i></div>
                         <div class="chat-tool-btn"><i class="fas fa-paperclip"></i></div>
                     </div>
-                    <div class="chat-input-wrapper">
-                        <textarea class="chat-input" placeholder="输入消息..." id="message-input" ${!canSendThisContact ? 'disabled' : ''}></textarea>
+                    <div class="input-row">
+                        <div class="chat-input-wrapper">
+                            <textarea class="chat-input" placeholder="输入消息..." id="message-input" ${!canSendThisContact ? 'disabled' : ''}></textarea>
+                        </div>
+                        <button class="send-btn" id="send-btn" ${!canSendThisContact ? 'disabled' : ''}>发送</button>
                     </div>
-                    <button class="send-btn" id="send-btn" ${!canSendThisContact ? 'disabled' : ''}>发送</button>
                 `;
                 
                 chatInputAreaEl.appendChild(inputArea);
@@ -2220,10 +2243,12 @@
                         <div class="chat-tool-btn"><i class="fas fa-smile"></i></div>
                         <div class="chat-tool-btn"><i class="fas fa-paperclip"></i></div>
                     </div>
-                    <div class="chat-input-wrapper">
-                        <textarea class="chat-input" placeholder="输入消息..." id="message-input" ${!chat.canSend ? 'disabled' : ''}></textarea>
+                    <div class="input-row">
+                        <div class="chat-input-wrapper">
+                            <textarea class="chat-input" placeholder="输入消息..." id="message-input" ${!chat.canSend ? 'disabled' : ''}></textarea>
+                        </div>
+                        <button class="send-btn" id="send-btn" ${!chat.canSend ? 'disabled' : ''}>发送</button>
                     </div>
-                    <button class="send-btn" id="send-btn" ${!chat.canSend ? 'disabled' : ''}>发送</button>
                 `;
                 
                 chatInputAreaEl.appendChild(inputArea);
@@ -2982,8 +3007,10 @@
             var inputArea = document.createElement('div');
             inputArea.className = 'chat-input-area';
             inputArea.innerHTML = '<div class="chat-tools"><div class="chat-tool-btn"><i class="fas fa-smile"></i></div></div>' +
+                '<div class="input-row">' +
                 '<div class="chat-input-wrapper"><textarea class="chat-input readonly" id="xqy-input" readonly placeholder="点击此处输入消息"></textarea></div>' +
-                '<button class="send-btn" id="xqy-send">发送</button>';
+                '<button class="send-btn" id="xqy-send">发送</button>' +
+                '</div>';
             chatInputAreaEl.appendChild(inputArea);
 
             var inp = document.getElementById('xqy-input');
@@ -3065,7 +3092,7 @@
                         // 当前轮到对方发言，自动开始播放
                         var ia = document.createElement('div');
                         ia.className = 'chat-input-area';
-                        ia.innerHTML = '<div class="chat-input-wrapper"><textarea class="chat-input" disabled placeholder="对方正在输入..."></textarea></div><button class="send-btn" disabled>发送</button>';
+                        ia.innerHTML = '<div class="input-row"><div class="chat-input-wrapper"><textarea class="chat-input" disabled placeholder="对方正在输入..."></textarea></div><button class="send-btn" disabled>发送</button></div>';
                         chatInputAreaEl.appendChild(ia);
                         // 延迟后自动播放
                         setTimeout(playXiaoqingyuScript, 1000);
@@ -3073,13 +3100,13 @@
                         // 显示禁用输入框
                         var ia = document.createElement('div');
                         ia.className = 'chat-input-area';
-                        ia.innerHTML = '<div class="chat-input-wrapper"><textarea class="chat-input" disabled placeholder="对方正在输入..."></textarea></div><button class="send-btn" disabled>发送</button>';
+                        ia.innerHTML = '<div class="input-row"><div class="chat-input-wrapper"><textarea class="chat-input" disabled placeholder="对方正在输入..."></textarea></div><button class="send-btn" disabled>发送</button></div>';
                         chatInputAreaEl.appendChild(ia);
                     }
                 } else {
                     var ia2 = document.createElement('div');
                     ia2.className = 'chat-input-area';
-                    ia2.innerHTML = '<div class="chat-input-wrapper"><textarea class="chat-input" disabled placeholder="无法发送消息"></textarea></div><button class="send-btn" disabled>发送</button>';
+                    ia2.innerHTML = '<div class="input-row"><div class="chat-input-wrapper"><textarea class="chat-input" disabled placeholder="无法发送消息"></textarea></div><button class="send-btn" disabled>发送</button></div>';
                     chatInputAreaEl.appendChild(ia2);
                 }
                 return;
@@ -3151,7 +3178,7 @@
                 }
                 var ia = document.createElement('div');
                 ia.className = 'chat-input-area';
-                ia.innerHTML = '<div class="chat-input-wrapper"><textarea class="chat-input" disabled placeholder="对话已结束"></textarea></div><button class="send-btn" disabled>发送</button>';
+                ia.innerHTML = '<div class="input-row"><div class="chat-input-wrapper"><textarea class="chat-input" disabled placeholder="对话已结束"></textarea></div><button class="send-btn" disabled>发送</button></div>';
                 chatInputAreaEl.appendChild(ia);
                 return;
             }
@@ -3159,8 +3186,10 @@
             var inputArea = document.createElement('div');
             inputArea.className = 'chat-input-area';
             inputArea.innerHTML = '<div class="chat-tools"><div class="chat-tool-btn"><i class="fas fa-smile"></i></div></div>' +
+                '<div class="input-row">' +
                 '<div class="chat-input-wrapper"><textarea class="chat-input readonly" id="script-input" readonly placeholder="点击此处输入消息"></textarea></div>' +
-                '<button class="send-btn" id="script-send">发送</button>';
+                '<button class="send-btn" id="script-send">发送</button>' +
+                '</div>';
             chatInputAreaEl.appendChild(inputArea);
 
             var inp = document.getElementById('script-input');
