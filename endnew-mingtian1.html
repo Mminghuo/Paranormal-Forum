@@ -635,8 +635,11 @@
         }
 
         function playNextReporter(chatId, script, stageKey, completeKey, character) {
+            // 防御性检查
+            if (!gameState || !script) return;
+            
             let stage = gameState[stageKey];
-            if (stage >= script.length) {
+            if (stage === undefined || stage >= script.length) {
                 gameState[completeKey] = true;
                 const chat = gameState.chatData.find(c => c.id === chatId);
                 if (chat) chat.canSend = false;
@@ -650,27 +653,45 @@
                 return;
             }
             const line = script[stage];
-            if (line[character]) {
-                // 只有当当前显示的是对应聊天时，才显示输入指示器
-                if (gameState.currentChatId === chatId) {
-                    showTypingIndicator(chatId);
-                }
+            if (line && line[character]) {
+                // 显示输入指示器（无论是否当前显示该聊天）
+                // 因为在手机端，用户可能正在查看该聊天
+                showTypingIndicator(chatId);
+                
                 setTimeout(() => {
-                    // 移除输入指示器（如果存在）
-                    removeTypingIndicator();
-                    const chat = gameState.chatData.find(c => c.id === chatId);
-                    const nowTime = new Date(); const ts = `${nowTime.getHours().toString().padStart(2,'0')}:${nowTime.getMinutes().toString().padStart(2,'0')}`;
-                    chat.messages.push({ type: 'received', time: `今天 ${ts}`, content: line[character] });
-                    chat.lastTimestamp = Date.now(); chat.lastTime = '刚刚'; chat.preview = line[character].substring(0,15);
-                    gameState[stageKey] = stage + 1;
-                    // 只有当当前显示的是对应聊天时，才刷新聊天界面
-                    if (gameState.currentChatId === chatId) {
-                        switchToChat(chatId);
+                    try {
+                        // 移除输入指示器（如果存在）
+                        removeTypingIndicator();
+                        
+                        const chat = gameState.chatData.find(c => c.id === chatId);
+                        if (!chat) return;
+                        
+                        const nowTime = new Date(); 
+                        const ts = `${nowTime.getHours().toString().padStart(2,'0')}:${nowTime.getMinutes().toString().padStart(2,'0')}`;
+                        chat.messages.push({ type: 'received', time: `今天 ${ts}`, content: line[character] });
+                        chat.lastTimestamp = Date.now(); 
+                        chat.lastTime = '刚刚'; 
+                        chat.preview = line[character].substring(0,15);
+                        gameState[stageKey] = stage + 1;
+                        
+                        // 无论当前是否显示该聊天，都更新聊天界面
+                        // 这样在手机端切换回来时，消息已经存在
+                        if (gameState.currentChatId === chatId) {
+                            switchToChat(chatId);
+                        }
+                        
+                        renderChatList();
+                        saveGameState(); // 保存状态
+                        
+                        // 继续处理下一条
+                        playNextReporter(chatId, script, stageKey, completeKey, character);
+                    } catch (e) {
+                        console.error('处理消息时出错:', e);
+                        // 即使出错，也要确保脚本继续执行
+                        gameState[stageKey] = stage + 1;
+                        saveGameState();
+                        playNextReporter(chatId, script, stageKey, completeKey, character);
                     }
-                    renderChatList();
-                    saveGameState(); // 保存状态
-                    // 继续处理下一条
-                    playNextReporter(chatId, script, stageKey, completeKey, character);
                 }, line.delay || 2000);
             } else {
                 // 没有对方发言，直接进入下一步（玩家发言）
@@ -681,20 +702,34 @@
         }
 
         function showTypingIndicator(chatId) {
+            // 防御性检查
+            if (!gameState || !chatMessagesEl) return;
+            
             // 只有当当前显示的聊天窗口是对应聊天时，才显示输入指示器
             if (gameState.currentChatId !== chatId) return;
             
-            const typingDiv = document.createElement('div'); 
-            typingDiv.className = 'message received'; 
-            typingDiv.id = 'typing-indicator';
-            const avatar = getRandomAvatar(chatId);
-            typingDiv.innerHTML = `<div class="message-avatar" style="background-color:${avatar.color};">${avatar.text}</div><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
-            chatMessagesEl.appendChild(typingDiv);
-            chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+            try {
+                // 先移除已存在的输入指示器
+                removeTypingIndicator();
+                
+                const typingDiv = document.createElement('div'); 
+                typingDiv.className = 'message received'; 
+                typingDiv.id = 'typing-indicator';
+                const avatar = getRandomAvatar(chatId);
+                typingDiv.innerHTML = `<div class="message-avatar" style="background-color:${avatar.color};">${avatar.text}</div><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+                chatMessagesEl.appendChild(typingDiv);
+                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+            } catch (e) {
+                console.error('显示输入指示器时出错:', e);
+            }
         }
         function removeTypingIndicator() { 
-            const el = document.getElementById('typing-indicator'); 
-            if(el) el.remove(); 
+            try {
+                const el = document.getElementById('typing-indicator'); 
+                if(el) el.remove(); 
+            } catch (e) {
+                console.error('移除输入指示器时出错:', e);
+            }
         }
 
         function sendFreeMessage(chatId, text) {
