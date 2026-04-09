@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -18,7 +18,8 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
+            overflow-x: hidden;
         }
         
         .page-container {
@@ -29,6 +30,7 @@
             border: 1px solid #d4c9b5;
             padding: 40px;
             position: relative;
+            box-sizing: border-box;
         }
         
         /* 竖排文字容器 */
@@ -43,6 +45,7 @@
             margin: 0 auto;
             padding: 20px 0;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         /* 段落间距 */
@@ -78,30 +81,49 @@
         @media (max-width: 768px) {
             .page-container {
                 padding: 20px;
+                margin: 10px 0;
             }
             
             .vertical-text {
-                font-size: 24px;
+                font-size: 22px;
                 letter-spacing: 0.2em;
+                max-height: 600px;
+                line-height: 1.6;
             }
             
             .title {
-                font-size: 28px;
+                font-size: 26px;
+                padding-bottom: 20px;
+                margin-bottom: 20px;
             }
         }
         
         @media (max-width: 480px) {
-            .vertical-text {
-                font-size: 20px;
-                letter-spacing: 0.1em;
-            }
-            
-            .title {
-                font-size: 24px;
+            body {
+                padding: 5px;
             }
             
             .page-container {
                 padding: 15px;
+                margin: 5px 0;
+            }
+            
+            .vertical-text {
+                font-size: 18px;
+                letter-spacing: 0.15em;
+                max-height: 500px;
+                line-height: 1.5;
+            }
+            
+            .title {
+                font-size: 22px;
+                padding-bottom: 15px;
+                margin-bottom: 15px;
+            }
+            
+            /* 手机上调整竖排文字的显示 */
+            .vertical-text p {
+                margin-top: 1.5em;
             }
         }
         
@@ -138,13 +160,16 @@
             
             // 确保文本容器高度合适
             function adjustHeight() {
-                const textHeight = verticalText.scrollHeight;
-                const maxHeight = Math.min(textHeight, 750);
+                const windowHeight = window.innerHeight;
+                const containerHeight = windowHeight - 40; // 减去页面边距
+                const maxHeight = Math.min(verticalText.scrollHeight, containerHeight);
                 verticalText.style.height = maxHeight + 'px';
                 
                 // 如果内容超过最大高度，添加渐变提示
-                if (textHeight > 750) {
+                if (verticalText.scrollHeight > maxHeight) {
                     verticalText.style.maskImage = 'linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)';
+                } else {
+                    verticalText.style.maskImage = 'none';
                 }
             }
             
